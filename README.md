@@ -1,9 +1,22 @@
-# Logstash Java Plugin
+# Logstash YDB Topics Output Plugin
 
-[![Travis Build Status](https://travis-ci.com/logstash-plugins/logstash-output-java_output_example.svg)](https://travis-ci.com/logstash-plugins/logstash-output-java_output_example)
+На вход плагина поступают данные из **Logstash** , а на выход передаются непосредтсвенно в **YDB Topics**.
 
-This is a Java plugin for [Logstash](https://github.com/elastic/logstash).
+## Тестовая Конфигурация Output Плагина
 
-It is fully free and fully open source. The license is Apache 2.0, meaning you are free to use it however you want.
+```
+input {
+  stdin {
+    codec => line
+  }
+}
 
-The documentation for Logstash Java plugins is available [here](https://www.elastic.co/guide/en/logstash/6.7/contributing-java-plugin.html).
+output {
+  ydb_topics_output {
+    count => 3  # Количество сообщений для чтения
+    prefix => "message"  # Префикс для сообщений
+    topic_path => "topic_path"  # Путь к топику в YDB Topics
+    connection_string => "grpc://localhost:2136?database=/local"
+  }
+}
+```
