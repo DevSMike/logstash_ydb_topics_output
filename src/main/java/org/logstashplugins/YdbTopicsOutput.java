@@ -34,13 +34,15 @@ public class YdbTopicsOutput implements Output {
     private final String producerId;
     private final String connectionString;
     private final CompletableFuture<Void> initFuture;
+    private final Object initLock = new Object();
     private GrpcTransport transport;
     private TopicClient topicClient;
     private AsyncWriter asyncWriter;
     private final String id;
     private final String prefix;
     private volatile boolean stopped = false;
-    private final Object initLock = new Object();
+    private String currentMessage;
+
 
     public YdbTopicsOutput(String id, Configuration config, Context context) {
         this.topicPath = config.get(PluginConfigSpec.stringSetting("topic_path"));
@@ -65,7 +67,7 @@ public class YdbTopicsOutput implements Output {
 
             Iterator<Event> z = events.iterator();
             while (z.hasNext() && !stopped) {
-                String s = prefix + z.next();
+                String s = prefix + z.next().getData();
                 sendMessage(s);
             }
 
@@ -107,6 +109,7 @@ public class YdbTopicsOutput implements Output {
         if (asyncWriter != null) {
             try {
                 asyncWriter.send(Message.of(message.getBytes()));
+                currentMessage = message;
             } catch (Exception e) {
                 logger.error("Error sending message to YDB Topics: " + e.getMessage(), e);
             }
@@ -137,5 +140,9 @@ public class YdbTopicsOutput implements Output {
     @Override
     public String getId() {
         return id;
+    }
+
+    public String getCurrentMessage() {
+        return currentMessage;
     }
 }
