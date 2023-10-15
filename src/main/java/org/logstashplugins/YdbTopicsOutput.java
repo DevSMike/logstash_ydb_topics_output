@@ -35,13 +35,13 @@ public class YdbTopicsOutput implements Output {
     private final String connectionString;
     private final CompletableFuture<Void> initFuture;
     private final Object initLock = new Object();
-    private GrpcTransport transport;
-    private TopicClient topicClient;
-    private AsyncWriter asyncWriter;
     private final String id;
     private final String prefix;
     private volatile boolean stopped = false;
     private String currentMessage;
+    private GrpcTransport transport;
+    private TopicClient topicClient;
+    private AsyncWriter asyncWriter;
 
 
     public YdbTopicsOutput(String id, Configuration config, Context context) {
