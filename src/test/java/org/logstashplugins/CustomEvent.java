@@ -9,10 +9,14 @@ import java.util.Map;
 public class CustomEvent implements Event {
 
     private String field;
+    private Integer count = 0;
+
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of("1", field);
+        ++count;
+        String number = count.toString();
+        return Map.of(number, field);
     }
 
     @Override
