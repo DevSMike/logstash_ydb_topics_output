@@ -3,6 +3,7 @@ package org.logstashplugins;
 import co.elastic.logstash.api.*;
 import org.junit.Test;
 import org.logstash.plugins.ConfigurationImpl;
+import org.logstashplugins.util.CustomEvent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +14,6 @@ import static junit.framework.TestCase.assertEquals;
 public class YdbTopicsOutputTest {
 
     private static final String CONNECTION_STRING = "grpc://localhost:2136?database=/local";
-
     private static final String TOPIC_PATH = "my-topic";
 
     @Test

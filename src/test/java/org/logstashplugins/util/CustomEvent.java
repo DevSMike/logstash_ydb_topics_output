@@ -1,4 +1,4 @@
-package org.logstashplugins;
+package org.logstashplugins.util;
 
 import co.elastic.logstash.api.Event;
 
