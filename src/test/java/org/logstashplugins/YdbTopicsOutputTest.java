@@ -17,10 +17,12 @@ public class YdbTopicsOutputTest {
     private static final String TOPIC_PATH = "my-topic";
 
     @Test
-    public void testMessageWriting()  {
+    public void testMessageWritingBinary()  {
         Map<String, Object> configValues = new HashMap<>();
         configValues.put("topic_path", TOPIC_PATH);
         configValues.put("connection_string", CONNECTION_STRING);
+        configValues.put("schema", "BINARY");
+
         Configuration config = new ConfigurationImpl(configValues);
 
         YdbTopicsOutput output = new YdbTopicsOutput("test", config, null);
@@ -31,6 +33,26 @@ public class YdbTopicsOutputTest {
         output.output(List.of(event1));
         output.stop();
 
-        assertEquals(output.getCurrentMessage(), "{1=Hello, from YDB}");
+        assertEquals(output.getCurrentMessage(), "{key1=Hello, from YDB}");
+    }
+
+    @Test
+    public void testMessageWritingJson()  {
+        Map<String, Object> configValues = new HashMap<>();
+        configValues.put("topic_path", TOPIC_PATH);
+        configValues.put("connection_string", CONNECTION_STRING);
+        configValues.put("schema", "JSON");
+
+        Configuration config = new ConfigurationImpl(configValues);
+
+        YdbTopicsOutput output = new YdbTopicsOutput("test", config, null);
+
+        CustomEvent event1 = new CustomEvent();
+        event1.setField("value 1 2 3 4", null);
+
+        output.output(List.of(event1));
+        output.stop();
+
+        assertEquals(output.getCurrentMessage(), "{\"key1\":\"value 1 2 3 4\"}");
     }
 }
