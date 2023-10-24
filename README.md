@@ -54,6 +54,7 @@ output {
     producer_id => "test_producer"
     connection_string => "grpc://localhost:2136?database=/local"
     access_token => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOi"
+    schema => "JSON"
   }
 }
 ```
@@ -75,6 +76,7 @@ output {
     producer_id => "test_producer"
     connection_string => "grpc://localhost:2136?database=/local"
     service_account_key => "path/to/sa_file.json"
+    schema => "JSON"
   }
 }
 ```
