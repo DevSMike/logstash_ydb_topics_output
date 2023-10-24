@@ -15,8 +15,7 @@ public class CustomEvent implements Event {
     @Override
     public Map<String, Object> getData() {
         ++count;
-        String number = count.toString();
-        return Map.of(number, field);
+        return Map.of("key"+ count, field);
     }
 
     @Override
