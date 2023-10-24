@@ -6,6 +6,8 @@ import co.elastic.logstash.api.Event;
 import co.elastic.logstash.api.LogstashPlugin;
 import co.elastic.logstash.api.Output;
 import co.elastic.logstash.api.PluginConfigSpec;
+import org.logstashplugins.util.MessageProcessor;
+import org.logstashplugins.util.MessageProcessorCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.ydb.auth.AuthProvider;
@@ -35,6 +37,7 @@ public class YdbTopicsOutput implements Output {
     private final String topicPath;
     private final String producerId;
     private final String connectionString;
+    private MessageProcessor messageProcessor  = MessageProcessorCreator::processBinaryString;
     private final String id;
     private volatile boolean stopped = false;
     private String currentMessage;
@@ -48,6 +51,10 @@ public class YdbTopicsOutput implements Output {
         topicPath = config.get(PluginConfigSpec.stringSetting("topic_path"));
         connectionString = config.get(PluginConfigSpec.stringSetting("connection_string"));
         producerId = config.get(PluginConfigSpec.stringSetting("producer_id"));
+        String schema = config.get(PluginConfigSpec.stringSetting("schema"));
+        if (schema.equals("JSON")) {
+            messageProcessor = MessageProcessorCreator::processJsonString;
+        }
 
         String accessToken = config.get(PluginConfigSpec.stringSetting("access_token"));
         if (accessToken != null) {
@@ -67,7 +74,7 @@ public class YdbTopicsOutput implements Output {
 
         Iterator<Event> z = events.iterator();
         while (z.hasNext() && !stopped) {
-            String s = z.next().getData().toString();
+            String s = messageProcessor.process(z.next().getData());
             sendMessage(s);
         }
     }
