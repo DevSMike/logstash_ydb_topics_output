@@ -32,29 +32,25 @@ import java.util.Iterator;
 public class YdbTopicsOutput implements Output {
 
     public static final PluginConfigSpec<String> PREFIX_CONFIG = PluginConfigSpec.stringSetting("prefix", "");
-
+    private final MessageProcessor messageProcessor  = MessageProcessorCreator::processJsonString;
     private final Logger logger = LoggerFactory.getLogger(YdbTopicsOutput.class);
+    private AuthProvider authProvider = NopAuthProvider.INSTANCE;
+    private volatile boolean stopped = false;
     private final String topicPath;
     private final String producerId;
     private final String connectionString;
-    private MessageProcessor messageProcessor  = MessageProcessorCreator::processBinaryString;
     private final String id;
-    private volatile boolean stopped = false;
     private String currentMessage;
     private GrpcTransport transport;
     private TopicClient topicClient;
     private AsyncWriter asyncWriter;
-    private AuthProvider authProvider = NopAuthProvider.INSTANCE;
+
 
     public YdbTopicsOutput(String id, Configuration config, Context context) {
         this.id = id;
         topicPath = config.get(PluginConfigSpec.stringSetting("topic_path"));
         connectionString = config.get(PluginConfigSpec.stringSetting("connection_string"));
         producerId = config.get(PluginConfigSpec.stringSetting("producer_id"));
-        String schema = config.get(PluginConfigSpec.stringSetting("schema"));
-        if (schema.equals("JSON")) {
-            messageProcessor = MessageProcessorCreator::processJsonString;
-        }
 
         String accessToken = config.get(PluginConfigSpec.stringSetting("access_token"));
         if (accessToken != null) {
@@ -74,8 +70,8 @@ public class YdbTopicsOutput implements Output {
 
         Iterator<Event> z = events.iterator();
         while (z.hasNext() && !stopped) {
-            String s = messageProcessor.process(z.next().getData());
-            sendMessage(s);
+            byte[] message = messageProcessor.process(z.next().getData());
+            sendMessage(message);
         }
     }
 
@@ -96,11 +92,11 @@ public class YdbTopicsOutput implements Output {
         asyncWriter.init().join();
     }
 
-    private void sendMessage(String message) {
+    private void sendMessage(byte[] message) {
         if (asyncWriter != null) {
             try {
-                asyncWriter.send(Message.of(message.getBytes()));
-                currentMessage = message;
+                asyncWriter.send(Message.of(message));
+                currentMessage = new String(message);
             } catch (Exception e) {
                 logger.error("Error sending message to YDB Topics: " + e.getMessage(), e);
             }
