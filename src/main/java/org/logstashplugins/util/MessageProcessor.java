@@ -4,5 +4,5 @@ import java.util.Map;
 
 @FunctionalInterface
 public interface MessageProcessor {
-    String process(Map<String, Object> data);
+    byte[] process(Map<String, Object> data);
 }
