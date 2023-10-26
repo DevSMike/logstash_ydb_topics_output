@@ -4,18 +4,15 @@ import co.elastic.logstash.api.Event;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 
 public class CustomEvent implements Event {
-
-    private String field;
-    private Integer count = 0;
-
+    private final Map<String, Object> map = new HashMap<>();
 
     @Override
     public Map<String, Object> getData() {
-        ++count;
-        return Map.of("key"+ count, field);
+        return map;
     }
 
     @Override
@@ -50,7 +47,7 @@ public class CustomEvent implements Event {
 
     @Override
     public Object getField(String s) {
-        return this.field;
+        return null;
     }
 
     @Override
@@ -60,7 +57,7 @@ public class CustomEvent implements Event {
 
     @Override
     public void setField(String s, Object o) {
-        field = s;
+        map.put(s, o);
     }
 
     @Override
