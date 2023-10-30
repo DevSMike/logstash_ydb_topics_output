@@ -4,7 +4,6 @@ import co.elastic.logstash.api.*;
 import org.junit.Test;
 import org.logstash.plugins.ConfigurationImpl;
 import org.logstashplugins.util.CustomEvent;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
