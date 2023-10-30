@@ -19,6 +19,7 @@ import tech.ydb.topic.TopicClient;
 import tech.ydb.topic.write.AsyncWriter;
 import tech.ydb.topic.write.Message;
 import tech.ydb.topic.settings.WriterSettings;
+import tech.ydb.topic.write.QueueOverflowException;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -32,7 +33,7 @@ import java.util.Iterator;
 public class YdbTopicsOutput implements Output {
 
     public static final PluginConfigSpec<String> PREFIX_CONFIG = PluginConfigSpec.stringSetting("prefix", "");
-    private final MessageProcessor messageProcessor  = MessageProcessorCreator::processJsonString;
+    private final MessageProcessor messageProcessor = MessageProcessorCreator::processJsonString;
     private final Logger logger = LoggerFactory.getLogger(YdbTopicsOutput.class);
     private AuthProvider authProvider = NopAuthProvider.INSTANCE;
     private volatile boolean stopped = false;
@@ -44,7 +45,6 @@ public class YdbTopicsOutput implements Output {
     private GrpcTransport transport;
     private TopicClient topicClient;
     private AsyncWriter asyncWriter;
-
 
     public YdbTopicsOutput(String id, Configuration config, Context context) {
         this.id = id;
@@ -67,7 +67,6 @@ public class YdbTopicsOutput implements Output {
     public void output(Collection<Event> events) {
         initializeTransport();
         initializeWriter();
-
         Iterator<Event> z = events.iterator();
         while (z.hasNext() && !stopped) {
             byte[] message = messageProcessor.process(z.next().getData());
@@ -93,13 +92,11 @@ public class YdbTopicsOutput implements Output {
     }
 
     private void sendMessage(byte[] message) {
-        if (asyncWriter != null) {
-            try {
-                asyncWriter.send(Message.of(message));
-                currentMessage = new String(message);
-            } catch (Exception e) {
-                logger.error("Error sending message to YDB Topics: " + e.getMessage(), e);
-            }
+        try {
+            asyncWriter.send(Message.of(message));
+            currentMessage = new String(message);
+        } catch (QueueOverflowException e) {
+            logger.error("Error sending message to YDB Topics: " + e.getMessage(), e);
         }
     }
 
