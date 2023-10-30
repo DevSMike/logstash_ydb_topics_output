@@ -1,6 +1,8 @@
 package org.logstashplugins.util;
 
 import co.elastic.logstash.api.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -8,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CustomEvent implements Event {
+    private static final Logger logger = LoggerFactory.getLogger(CustomEvent.class);
     private final Map<String, Object> map = new HashMap<>();
 
     @Override
@@ -57,6 +60,7 @@ public class CustomEvent implements Event {
 
     @Override
     public void setField(String s, Object o) {
+        logger.info("Adding in map object with key: " + s + " and data: " + o);
         map.put(s, o);
     }
 
